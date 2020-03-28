@@ -7,31 +7,38 @@ trait XMLresource {
   
   protected $document,
             $xpath,
-            $filepath;
+            $path;
 
   public function find($exp, ?DOMNode $context = null) {
-    return $this->xpath->query($exp, $context);
+    if ($result = $this->xpath->query($exp, $context)) {
+      return $result;
+    } else {
+      echo "Problem with predictate: {$exp}";
+    }
   }
   
   public function select($exp, ?DOMNode $context = null) {
     return $this->find($exp, $context)[0] ?? null; 
   }
   
-  protected function load(string $filepath, array $opts = ['validateOnParse' => true]) {
-    $this->filepath = $filepath;
+  protected function load(string $fullpath, array $opts = ['validateOnParse' => true]) {
+    $this->path = (object)(pathinfo($fullpath) + ['full' => $fullpath]);
     $this->document = new DOMDocument();
     
     $config = ['formatOutput' => true, 'preserveWhiteSpace'=> false] + $opts;
 
     foreach ($config as $prop => $flag) $this->document->{$prop} = $flag;
-
-    $this->document->load($this->filepath);
+    
+    $this->document->load($this->path->full);
         
     $this->xpath  = new DOMXpath($this->document);
   }
   
-  public function save() {
-    $this->document->save($this->filepath);
+  public function save($compress = false) {
+    if ($compress || $this->path->extension === 'gz') {
+      file_put_contents("{$this->path->full}.gz", gzcompress($this->document->saveXML()));
+    }
+    else $this->document->save($this->path->full);
   }
 
 }

@@ -21,10 +21,14 @@ class Serial {
 
   ];
   
+  const CODEX = ['A','B','C','D','E','F','G','H','I','J','K','L','M',
+                 'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+                 'a','b','c','d','e','f','g','h','i','j','k','l','m',
+                 'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+  
   protected $codex, $base;
-  private function __construct($input) {
-    $this->codex = array_merge(range(...self::UTF['A-Z']), range(...self::UTF['a-z']));
-    // $this->codex = $this->mb_range(...self::UTF['braille']);
+  private function __construct($input, $codex = null) {
+    $this->codex = $codex ?? self::CODEX;
     $this->base  = count($this->codex);
   }
   
