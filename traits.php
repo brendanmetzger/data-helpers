@@ -12,19 +12,21 @@ trait XMLresource {
   public function find($exp, ?DOMNode $context = null) {
     return $this->xpath->query($exp, $context);
   }
+  
   public function select($exp, ?DOMNode $context = null) {
     return $this->find($exp, $context)[0] ?? null; 
   }
   
-  protected function load(string $filepath) {
+  protected function load(string $filepath, array $opts = ['validateOnParse' => true]) {
     $this->filepath = $filepath;
     $this->document = new DOMDocument();
     
-    $this->document->formatOutput       = true;
-    $this->document->preserveWhiteSpace = false;
-    $this->document->validateOnParse    = true;
+    $config = ['formatOutput' => true, 'preserveWhiteSpace'=> false] + $opts;
+
+    foreach ($config as $prop => $flag) $this->document->{$prop} = $flag;
+
     $this->document->load($this->filepath);
-    
+        
     $this->xpath  = new DOMXpath($this->document);
   }
   

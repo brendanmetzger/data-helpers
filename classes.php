@@ -20,6 +20,7 @@ class Serial {
     'braille' => ["\u{02800}","\u{028FF}"], // (interesting for encoding, but out of range for @id)
 
   ];
+  
   protected $codex, $base;
   private function __construct($input) {
     $this->codex = array_merge(range(...self::UTF['A-Z']), range(...self::UTF['a-z']));
@@ -73,7 +74,9 @@ class Serial {
 # for times when you are staring at a black streen with blinking cursor..
 
 class Benchmark {
+  
   public $tasks   = 0;
+  
   private $mark   = [];
   private $splits = [];
   
