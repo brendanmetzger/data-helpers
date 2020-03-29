@@ -22,21 +22,23 @@ trait XMLresource {
   }
   
   protected function load(string $fullpath, array $opts = ['validateOnParse' => true]) {
-    $this->path = (object)(pathinfo($fullpath) + ['full' => $fullpath]);
+    $this->path = (object)(pathinfo($fullpath) + ['full' => realpath($fullpath)]);
+
     $this->document = new DOMDocument();
     
     $config = ['formatOutput' => true, 'preserveWhiteSpace'=> false] + $opts;
 
     foreach ($config as $prop => $flag) $this->document->{$prop} = $flag;
     
-    $this->document->load($this->path->full);
+    $protocol = $this->path->extension == 'gz' ? 'compress.zlib' : 'file';
+    $this->document->loadXML(file_get_contents("{$protocol}://{$this->path->full}"));
         
     $this->xpath  = new DOMXpath($this->document);
   }
   
   public function save($compress = false) {
     if ($compress || $this->path->extension === 'gz') {
-      file_put_contents("{$this->path->full}.gz", gzcompress($this->document->saveXML()));
+      file_put_contents("compress.zlib://{$this->path->full}.gz", $this->document->saveXML());
     }
     else $this->document->save($this->path->full);
   }
