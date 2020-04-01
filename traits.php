@@ -9,30 +9,40 @@ trait XMLresource {
             $xpath,
             $path;
 
-  public function find($exp, ?DOMNode $context = null) {
-    if ($result = $this->xpath->query($exp, $context)) {
-      return $result;
-    } else {
-      echo "Problem with predictate: {$exp}";
-    }
+  public function find($exp, ?DOMNode $context = null)
+  {
+    if (! $result = $this->xpath->query($exp, $context))
+      throw new Exception("Problem with xpath predicate: {$exp}");
+    
+    return $result;
   }
   
-  public function select($exp, ?DOMNode $context = null) {
+  public function eval($exp, ?DOMNode $context = null)
+  {
+    return trim($this->xpath->evaluate("string({$exp})", $context));
+  }
+  
+  public function select($exp, ?DOMNode $context = null)
+  {
     return $this->find($exp, $context)[0] ?? null; 
   }
   
-  protected function load(string $fullpath, array $opts = ['validateOnParse' => true]) {
-    $this->path = (object)(pathinfo($fullpath) + ['full' => realpath($fullpath)]);
+  protected function load(string $fullpath, array $opts = ['validateOnParse' => true])
+  {
+    $this->path      = (object)(pathinfo($fullpath) + ['full' => realpath($fullpath)]);
+    $this->path->uri = ($this->path->extension == 'gz' ? 'compress.zlib' : 'file') . "://{$this->path->full}";
 
+    $this->setDOM(file_get_contents($this->path->uri), $opts);
+  }
+  
+  protected function setDOM(string $xml, array $opts = [])
+  {
+    $document_props = ['formatOutput' => true, 'preserveWhiteSpace'=> false] + $opts;
     $this->document = new DOMDocument();
     
-    $config = ['formatOutput' => true, 'preserveWhiteSpace'=> false] + $opts;
-
-    foreach ($config as $prop => $flag) $this->document->{$prop} = $flag;
+    foreach ($document_props as $prop => $flag) $this->document->{$prop} = $flag;
     
-    $protocol = $this->path->extension == 'gz' ? 'compress.zlib' : 'file';
-    $this->document->loadXML(file_get_contents("{$protocol}://{$this->path->full}"));
-        
+    $this->document->loadXML($xml);    
     $this->xpath  = new DOMXpath($this->document);
   }
   
