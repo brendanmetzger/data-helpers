@@ -38,7 +38,7 @@ trait XMLresource {
   protected function setDOM(string $xml, array $opts = [])
   {
     $document_props = ['formatOutput' => true, 'preserveWhiteSpace'=> false] + $opts;
-    $this->document = new DOMDocument();
+    $this->document = new DOMDocument('1.0', 'UTF-8');
     
     foreach ($document_props as $prop => $flag) $this->document->{$prop} = $flag;
     
