@@ -56,6 +56,12 @@ class Serial {
     return $out;
   }
   
+  // TODO generator object that can also 
+  public function generator(DOMAttribute $serial) {
+    // note: serial represents the current length, therfore increment after setting current value is preferred
+    yield self::id(0);
+  }
+  
   static public function mb_range($start, $end, array $output = []) {
 
     if ($start == $end) return [$start];  // no range given
